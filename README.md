@@ -1,4 +1,3 @@
-
 Biggie-router is a high performance, extendable router for use in frameworks and applications. It draws inspiration from several popular open source frameworks and libraries, such as [jQuery](http://www.jquery.com/) and [Sinatra](http://www.sinatrarb.com/).
 
 ## License
@@ -22,7 +21,7 @@ Hello world, that listens on port 8080:
     var router = new Router();
 
     router.bind(function (request, response, next) {
-      response.sendBody(200, "Hello World!");
+      next.sendBody(200, "Hello World!");
     });
 
     router.listen(8080);
@@ -38,11 +37,11 @@ Requests that fall through (don't match any conditions) get passed to the next r
 
     router.get('/').get('/index.html')
           .bind(function (request, response, next) {
-      response.sendBody(200, "Hello World!");
+      next.sendBody(200, "Hello World!");
     });
 
     router.bind(function (request, response, next) {
-      response.sendBody(404, 'Resource "' + request.url + '" not found.');
+      next.sendBody(404, 'Resource "' + request.url + '" not found.');
     });
 
     router.listen(8080);
