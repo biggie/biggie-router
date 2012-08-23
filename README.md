@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/biggie/biggie-router.png)](http://travis-ci.org/biggie/biggie-router)
 Biggie-router is a high performance, extendable router for use in frameworks and applications. It draws inspiration from several popular open source frameworks and libraries, such as [jQuery](http://www.jquery.com/) and [Sinatra](http://www.sinatrarb.com/).
 
 ## License
