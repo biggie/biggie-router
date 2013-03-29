@@ -231,8 +231,6 @@ var Route = function Route(router, config) {
     OPTIONS: []
   }
 
-  this.errorhandlers = []
-
   // The processing layers
   this.layers = []
   this.length = 0
