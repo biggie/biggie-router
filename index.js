@@ -38,10 +38,12 @@ var Router = function Router (server, config) {
 
   config || (config = {})
 
-  this.env     = config.env || process.env.NODE_ENV || 'development'
-  this.routes  = []
-  this.headers = config.headers || { Server : 'node.js' }
-  this.next    = next_ext
+  this.env      = config.env || process.env.NODE_ENV || 'development'
+  this.routes   = []
+  this.headers  = config.headers || { Server : 'node.js' }
+  this.next     = next_ext
+
+  this.settings = {}
 
   next_ext.setDefaultHeaders(this.headers)
 
@@ -113,6 +115,17 @@ Router.next = next_ext
 
 // Extend http.Server
 Router.prototype.__proto__ = events.EventEmitter.prototype
+
+// Set a setting
+Router.prototype.set = function set (key, value) {
+  if (null == value) {
+    return this.settings[key]
+  }
+
+  this.settings[key] = value
+
+  return this
+}
 
 // Configure
 Router.prototype.configure = function configure (env, config) {
