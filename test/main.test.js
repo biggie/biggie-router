@@ -10,11 +10,19 @@ r.next.bend = function () {
 }
 
 r.get('/json').bind(function (req, res, next) {
-  next.text(new Buffer('testing'))
+  next(new Error)
+})
+
+r.configure('local', function (router) {
+  console.log('Is local environment')
 })
 
 r.bind(function (request, response, next) {
   next.bend();
+})
+
+r.bind(function test (err, req, res, next) {
+  next.send('Got error')
 })
 
 s.listen(8080);
