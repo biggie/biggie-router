@@ -3,7 +3,8 @@ var http   = require('http')
 var Router = require('../')
 
 var s = http.createServer()
-var r = new Router(s);
+var r = new Router
+r.listen(s)
 
 r.next.bend = function () {
   this.send('Bending')

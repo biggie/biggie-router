@@ -24,13 +24,10 @@
 // THE SOFTWARE.
 //
 
-var http     = require('http')
-var https    = require('https')
 var url      = require('url')
 var next_ext = require('./lib/next')
 var events   = require('events')
-
-var noop = function () {}
+var noop     = function () {}
 
 // The Router prototype
 var Router = function Router (server, config) {
@@ -47,7 +44,7 @@ var Router = function Router (server, config) {
 
   next_ext.setDefaultHeaders(this.headers)
 
-  server.on('request', function (request, response) {
+  this._onRequest = function _onRequest (request, response) {
     if (self.routes.length === 0) {
       // We got nothing to work with :(
       response.writeHead(404)
@@ -104,17 +101,25 @@ var Router = function Router (server, config) {
 
     // Get the party started
     self.routes[i].handle(request, response, next)
-  })
+  }
 
-  server.on('error', function (err) {
+  this._onError = function _onError (err) {
     self.emit('error', err)
-  })
+  }
 }
 
 Router.next = next_ext
 
 // Extend http.Server
 Router.prototype.__proto__ = events.EventEmitter.prototype
+
+// Listen to a server
+Router.prototype.listen = function listen (server) {
+  server.on('request', this._onRequest)
+  server.on('error', this._onError)
+
+  return this
+}
 
 // Set a setting
 Router.prototype.set = function set (key, value) {
