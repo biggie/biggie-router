@@ -1,15 +1,18 @@
-{
-  "name": "biggie-router",
-  "description": "The router as part of the biggie framework.",
-  "version": "0.3.4",
-  "author": "Tim Smart",
-  "licenses": [{
-    "type": "MIT"
-  }],
-  "repository": {
-    "type": "git",
-    "url": "http://github.com/biggie/biggie-router.git"
-  },
-  "engine": [ "node >=0.4.0" ],
-  "main": "./"
+{ "name" : "biggie-router"
+, "version" : "1.0.0-pre"
+, "author" : "Tim Smart <tim@fostle.com>"
+, "description" : "A lightweight extensible HTTP router"
+, "engines" :
+  { "node" : ">=0.10"
+  }
+, "homepage" : "https://github.com/tim-smart/biggie-router"
+, "repository" :
+  { "type" : "git"
+  , "url" : "git://github.com/tim-smart/biggie-router.git"
+  }
+, "bugs" : {
+    "email" : "tim@fostle.com"
+  , "url" : "https://github.com/tim-smart/biggie-router/issues"
+  }
+, "main" : "./index.js"
 }
