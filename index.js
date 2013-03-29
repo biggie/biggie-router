@@ -320,22 +320,26 @@ Route.prototype.handle = function handle(request, response, callback, error) {
   } else if (match) {
     // We have a match! Time to go through the processing layers
     function next (err) {
-      if (err) {
+      if (err && !self.errorhandler) {
         return callback(err)
       }
 
-      var args,
-          layer = self.layers[i++]
+      var layer   = self.layers[i++]
+      var handled = true
 
       if (layer) {
         // Catch layer errors
         try {
-          layer(request, response, next)
+          if (4 === layer.length) layer(err, request, response, next)
+          else if (!err)          layer(request, response, next)
+          else                    handled = false
         } catch (error) {
-          next(error)
+          return next(error)
         }
+
+        if (!handled) next(err)
       } else {
-        return callback()
+        return callback(err)
       }
     }
 
@@ -352,7 +356,7 @@ Route.prototype.handle = function handle(request, response, callback, error) {
     }
 
     // Start the processing madness
-    next()
+    next(error)
   } else if (callback) {
     callback()
   }
@@ -374,15 +378,10 @@ Route.prototype._checkRoute = function _checkRoute(route) {
 // bind: A simple processing layer
 Route.prototype.bind = function bind(fn) {
   if (typeof fn === 'function') {
-    if (this.errorhandler) {
-      log('Warning: error handler routes only can have one bind()')
-      return this
-    }
-
     this.layers.push(fn)
     ;++this.length
 
-    if (this.catch_all && 4 === fn.length && 1 === this.length) {
+    if (4 === fn.length) {
       this.errorhandler = true
       this.errorhandlers.push(fn)
     }

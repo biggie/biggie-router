@@ -10,9 +10,24 @@ r.next.bend = function () {
   this.send('Bending')
 }
 
-r.get('/json').bind(function (req, res, next) {
-  next(new Error)
-})
+r
+  .get('/json')
+  .bind(function (req, res, next) {
+    next(new Error)
+  })
+  .bind(function (err, req, res, next) {
+    next()
+  })
+  .bind(function (req, res, next) {
+    console.log('error handled, passing through...')
+    next(new Error)
+  })
+  .bind(function (req, res, next) {
+    next.send('This should never happen')
+  })
+  .bind(function (err, req, res, next) {
+    next.send('handled that error')
+  })
 
 r.configure('local', function (router) {
   console.log('Is local environment')
