@@ -1,20 +1,20 @@
 //
 // biggie-router
-// 
+//
 // The MIT License
-// 
+//
 // Copyright (c) 2010 Tim Smart
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,7 +22,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
 
 var url      = require('url')
 var next_ext = require('./lib/next')
@@ -310,10 +309,21 @@ Route.prototype.handle = function handle(request, response, callback, error) {
       next.match = null
     }
 
-    if (self.errorhandler) {
-      layer(error, request, response, next)
+    if ('function' === typeof layer) {
+      if (self.errorhandler) {
+        layer(error, request, response, next)
+      } else {
+        layer(request, response, next)
+      }
     } else {
-      layer(request, response, next)
+      var obj    = layer[0]
+      var method = layer[1]
+
+      if (self.errorhandler) {
+        obj[method](error, request, response, next)
+      } else {
+        obj[method](request, response, next)
+      }
     }
   } else if (match) {
     // We have a match! Time to go through the processing layers
@@ -325,7 +335,7 @@ Route.prototype.handle = function handle(request, response, callback, error) {
       var layer   = self.layers[i++]
       var handled = true
 
-      if (layer) {
+      if ('function' === typeof layer) {
         // Catch layer errors
         try {
           if (4 === layer.length) layer(err, request, response, next)
@@ -333,6 +343,23 @@ Route.prototype.handle = function handle(request, response, callback, error) {
           else                    handled = false
         } catch (error) {
           return next(error)
+        }
+
+        if (!handled) next(err)
+      } else if (layer) {
+        var obj    = layer[0]
+        var method = layer[1]
+
+        try {
+          if (4 === obj[method].length) {
+            obj[method](err, request, response, next)
+          } else if (!err) {
+            obj[method](request, response, next)
+          } else {
+            handled = false
+          }
+        } catch (error) {
+          return next(err)
         }
 
         if (!handled) next(err)
@@ -369,22 +396,28 @@ Route.prototype._checkRoute = function _checkRoute(route) {
   } else if (typeof route === 'string') {
     return true
   }
-  log('Warning: The route "' + route + '" was of unrecognised type.')
+  console.error('Warning: The route "' + route + '" was of unrecognised type.')
   return false
 }
 
 // bind: A simple processing layer
-Route.prototype.bind = function bind(fn) {
-  if (typeof fn === 'function') {
+Route.prototype.bind = function bind(fn, method) {
+  if (method && fn && 'function' === typeof fn[method]) {
+    this.layers.push([fn, method])
+    ;++this.length
+
+    if (4 === fn[method].length) {
+      this.errorhandler = true
+    }
+  } else if (typeof fn === 'function') {
     this.layers.push(fn)
     ;++this.length
 
     if (4 === fn.length) {
       this.errorhandler = true
-      this.errorhandlers.push(fn)
     }
   } else {
-    log('Warning: bind only accepts functions.')
+    console.error('Warning: bind only accepts functions.')
   }
   return this
 }
