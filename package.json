@@ -1,5 +1,5 @@
 { "name" : "biggie-router"
-, "version" : "1.0.0-pre"
+, "version" : "1.0.0"
 , "author" : "Tim Smart <tim@fostle.com>"
 , "description" : "A lightweight extensible HTTP router"
 , "engines" :
