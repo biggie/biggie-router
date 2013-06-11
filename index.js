@@ -279,8 +279,6 @@ Route.prototype.handle = function handle(request, response, callback, error) {
       if (route instanceof RegExp) {
         var temp_match
         if (temp_match = lower_path.match(route)) {
-          // TODO: Remove shift. Use queue?
-          temp_match.shift()
           // Keep a reference to the last regexp match
           match = temp_match
         }
