@@ -24,7 +24,7 @@
 // THE SOFTWARE.
 
 var url      = require('url')
-var next_ext = require('./lib/next')
+var Next     = require('./lib/next').Next
 var events   = require('events')
 var noop     = function () {}
 
@@ -34,14 +34,13 @@ var Router = function Router (server, config) {
 
   config || (config = {})
 
-  this.env      = config.env || process.env.NODE_ENV || 'development'
+  this.settings = config
   this.routes   = []
-  this.headers  = config.headers || { Server : 'node.js' }
-  this.next     = next_ext
+  this.next     = new Next(this)
 
-  this.settings = {}
-
-  next_ext.setDefaultHeaders(this.headers)
+  // Default config
+  this.settings.env || (this.settings.env = process.env.NODE_ENV || 'development')
+  this.settings.headers || (this.settings.headers = { Server : 'node.js' })
 
   this._onRequest = function _onRequest (request, response) {
     if (self.routes.length === 0) {
@@ -94,9 +93,9 @@ var Router = function Router (server, config) {
         }
       }
     }
-    next.__proto__ = next_ext
-    next.response = response
-    next.request  = request
+    next.__proto__ = self.next
+    next.response  = response
+    next.request   = request
 
     // Get the party started
     self.routes[i].handle(request, response, next)
@@ -107,7 +106,7 @@ var Router = function Router (server, config) {
   }
 }
 
-Router.next = next_ext
+Router.Next = Next
 
 // Extend http.Server
 Router.prototype.__proto__ = events.EventEmitter.prototype
@@ -138,7 +137,7 @@ Router.prototype.configure = function configure (env, config) {
     env    = null
   }
 
-  if (!env || this.env === env) {
+  if (!env || this.settings.env === env) {
     config(this)
   }
 
@@ -213,6 +212,7 @@ Router.prototype.options = function options() {
 // The Route prototype
 var Route = function Route(router, config) {
   this.router = router
+  this.next   = router.next
 
   // The default config
   this.parallel     = false
@@ -296,7 +296,7 @@ Route.prototype.handle = function handle(request, response, callback, error) {
     var layer = self.layers[0]
 
     // Add __proto__ methods.
-    next.__proto__ = next_ext
+    next.__proto__ = self.next
     next.response  = response
     next.request   = request
 
@@ -367,7 +367,7 @@ Route.prototype.handle = function handle(request, response, callback, error) {
     }
 
     // Add __proto__ methods.
-    next.__proto__ = next_ext
+    next.__proto__ = self.next
     next.response  = response
     next.request   = request
 
