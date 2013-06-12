@@ -218,7 +218,7 @@ var Route = function Route(router, config) {
   this.parallel     = false
   this.catchall     = false
   this.errorhandler = false
-  this.parse        = this.router.parse
+  this.parser       = this.router.settings.parser
 
   // The route table
   this.table = {
@@ -266,8 +266,8 @@ Route.prototype.handle = function handle(request, response, callback, error) {
 
   if (this.catch_all === true) {
     match = true
-  } else if (this.parse) {
-    match = this.parse(request)
+  } else if (this.parser) {
+    match = this.parser(request)
   } else {
     var lower_path = request.url.toLowerCase(),
         j          = 0,
